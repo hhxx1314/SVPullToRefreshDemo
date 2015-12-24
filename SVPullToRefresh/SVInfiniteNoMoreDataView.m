@@ -14,10 +14,10 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
-        imageView.contentMode = UIViewContentModeCenter;
-        imageView.image = [UIImage imageNamed:@"icon_list_end.png"];
-        [self addSubview:imageView];
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+        label.text = @"没有数据了";
+        label.textAlignment = NSTextAlignmentCenter;
+        [self addSubview:label];
     }
     return self;
 }
