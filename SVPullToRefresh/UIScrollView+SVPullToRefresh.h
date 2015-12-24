@@ -10,8 +10,8 @@
 #import <UIKit/UIKit.h>
 #import <AvailabilityMacros.h>
 
-
 @class SVPullToRefreshView;
+@class SVPullToRefreshLoadingView;
 
 @interface UIScrollView (SVPullToRefresh)
 
@@ -33,10 +33,7 @@ typedef NS_ENUM(NSUInteger, SVPullToRefreshState) {
 
 @interface SVPullToRefreshView : UIView
 
-@property (nonatomic, strong) UIImageView* imageView;
-@property (nonatomic, strong) NSArray* leftImageViews;
-@property (nonatomic, strong) NSArray* rightImageViews;
-
+@property (nonatomic, strong) SVPullToRefreshLoadingView *loadingView;
 
 @property (nonatomic, readonly) SVPullToRefreshState state;
 

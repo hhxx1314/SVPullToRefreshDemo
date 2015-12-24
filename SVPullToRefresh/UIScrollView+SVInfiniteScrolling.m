@@ -9,25 +9,16 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import "UIScrollView+SVInfiniteScrolling.h"
-
+#import "SVInfiniteScrollingLoadingView.h"
+#import "SVInfiniteNoMoreDataView.h"
 
 static CGFloat const SVInfiniteScrollingViewHeight = 60;
-
-@interface SVInfiniteScrollingDotView : UIView
-
-@property (nonatomic, strong) UIColor *arrowColor;
-
-@end
-
-
 
 @interface SVInfiniteScrollingView ()
 
 @property (nonatomic, copy) void (^infiniteScrollingHandler)(void);
 
-@property (nonatomic, strong) UIActivityIndicatorView *activityIndicatorView;
 @property (nonatomic, readwrite) SVInfiniteScrollingState state;
-@property (nonatomic, strong) NSMutableArray *viewForState;
 @property (nonatomic, weak) UIScrollView *scrollView;
 @property (nonatomic, readwrite) CGFloat originalBottomInset;
 @property (nonatomic, assign) BOOL wasTriggeredByUser;
@@ -54,7 +45,9 @@ UIEdgeInsets scrollViewOriginalContentInsets;
 - (void)addInfiniteScrollingWithActionHandler:(void (^)(void))actionHandler {
     
     if(!self.infiniteScrollingView) {
-        SVInfiniteScrollingView *view = [[SVInfiniteScrollingView alloc] initWithFrame:CGRectMake(0, self.contentSize.height, self.bounds.size.width, SVInfiniteScrollingViewHeight)];
+        
+        CGFloat width = [UIScreen mainScreen].bounds.size.width;
+        SVInfiniteScrollingView *view = [[SVInfiniteScrollingView alloc] initWithFrame:CGRectMake(0, self.contentSize.height, width, SVInfiniteScrollingViewHeight)];
         view.infiniteScrollingHandler = actionHandler;
         view.scrollView = self;
         [self addSubview:view];
@@ -110,36 +103,48 @@ UIEdgeInsets scrollViewOriginalContentInsets;
     return !self.infiniteScrollingView.hidden;
 }
 
+- (void)setShowsNoMoreDataView:(BOOL)showsNoMoreDataView
+{
+    self.infiniteScrollingView.hasMoreData = !showsNoMoreDataView;
+    if (showsNoMoreDataView) {
+        self.infiniteScrollingView.hidden = NO;
+        [self.infiniteScrollingView setScrollViewContentInsetForInfiniteScrolling];
+        [self.infiniteScrollingView setNeedsLayout];
+        self.infiniteScrollingView.frame = CGRectMake(0, self.contentSize.height, self.infiniteScrollingView.bounds.size.width, SVInfiniteScrollingViewHeight);
+    }
+}
+
+- (BOOL)showsNoMoreDataView {
+    return !self.infiniteScrollingView.hasMoreData;
+}
+
 @end
 
 
 #pragma mark - SVInfiniteScrollingView
 @implementation SVInfiniteScrollingView
 
-// public properties
-@synthesize infiniteScrollingHandler, activityIndicatorViewStyle;
-
-@synthesize state = _state;
-@synthesize scrollView = _scrollView;
-@synthesize activityIndicatorView = _activityIndicatorView;
-
-
-- (id)initWithFrame:(CGRect)frame {
+- (id)initWithFrame:(CGRect)frame
+{
     if(self = [super initWithFrame:frame]) {
         
-        // default styling values
-        self.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         self.state = SVInfiniteScrollingStateStopped;
         self.enabled = YES;
         
-        self.viewForState = [NSMutableArray arrayWithObjects:@"", @"", @"", @"", nil];
+        self.loadingView = [[SVInfiniteScrollingLoadingView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+        [self addSubview:self.loadingView];
+        
+        self.noMoreDataView = [[SVInfiniteNoMoreDataView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+        [self addSubview:self.noMoreDataView];
+        self.noMoreDataView.hidden = YES;
     }
     
     return self;
 }
 
-- (void)willMoveToSuperview:(UIView *)newSuperview {
+- (void)willMoveToSuperview:(UIView *)newSuperview
+{
     if (self.superview && newSuperview == nil) {
         UIScrollView *scrollView = (UIScrollView *)self.superview;
         if (scrollView.showsInfiniteScrolling) {
@@ -152,8 +157,12 @@ UIEdgeInsets scrollViewOriginalContentInsets;
     }
 }
 
-- (void)layoutSubviews {
-    self.activityIndicatorView.center = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2);
+- (void)setHasMoreData:(BOOL)hasMoreData
+{
+    _hasMoreData = hasMoreData;
+    
+    self.loadingView.hidden = !hasMoreData;
+    self.noMoreDataView.hidden = hasMoreData;
 }
 
 #pragma mark - Scroll View
@@ -205,40 +214,8 @@ UIEdgeInsets scrollViewOriginalContentInsets;
     }
 }
 
-#pragma mark - Getters
-
-- (UIActivityIndicatorView *)activityIndicatorView {
-    if(!_activityIndicatorView) {
-        _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
-        _activityIndicatorView.hidesWhenStopped = YES;
-        [self addSubview:_activityIndicatorView];
-    }
-    return _activityIndicatorView;
-}
-
-- (UIActivityIndicatorViewStyle)activityIndicatorViewStyle {
-    return self.activityIndicatorView.activityIndicatorViewStyle;
-}
-
 #pragma mark - Setters
 
-- (void)setCustomView:(UIView *)view forState:(SVInfiniteScrollingState)state {
-    id viewPlaceholder = view;
-    
-    if(!viewPlaceholder)
-        viewPlaceholder = @"";
-    
-    if(state == SVInfiniteScrollingStateAll)
-        [self.viewForState replaceObjectsInRange:NSMakeRange(0, 3) withObjectsFromArray:@[viewPlaceholder, viewPlaceholder, viewPlaceholder]];
-    else
-        [self.viewForState replaceObjectAtIndex:state withObject:viewPlaceholder];
-    
-    self.state = self.state;
-}
-
-- (void)setActivityIndicatorViewStyle:(UIActivityIndicatorViewStyle)viewStyle {
-    self.activityIndicatorView.activityIndicatorViewStyle = viewStyle;
-}
 
 #pragma mark -
 
@@ -262,39 +239,19 @@ UIEdgeInsets scrollViewOriginalContentInsets;
     
     SVInfiniteScrollingState previousState = _state;
     _state = newState;
-    
-    for(id otherView in self.viewForState) {
-        if([otherView isKindOfClass:[UIView class]])
-            [otherView removeFromSuperview];
-    }
-    
-    id customView = [self.viewForState objectAtIndex:newState];
-    BOOL hasCustomView = [customView isKindOfClass:[UIView class]];
-    
-    if(hasCustomView) {
-        [self addSubview:customView];
-        CGRect viewBounds = [customView bounds];
-        CGPoint origin = CGPointMake(roundf((self.bounds.size.width-viewBounds.size.width)/2), roundf((self.bounds.size.height-viewBounds.size.height)/2));
-        [customView setFrame:CGRectMake(origin.x, origin.y, viewBounds.size.width, viewBounds.size.height)];
-    }
-    else {
-        CGRect viewBounds = [self.activityIndicatorView bounds];
-        CGPoint origin = CGPointMake(roundf((self.bounds.size.width-viewBounds.size.width)/2), roundf((self.bounds.size.height-viewBounds.size.height)/2));
-        [self.activityIndicatorView setFrame:CGRectMake(origin.x, origin.y, viewBounds.size.width, viewBounds.size.height)];
-        
-        switch (newState) {
-            case SVInfiniteScrollingStateStopped:
-                [self.activityIndicatorView stopAnimating];
-                break;
+
+    switch (newState) {
+        case SVInfiniteScrollingStateStopped:
+            [self.loadingView stopLoading];
+            break;
                 
-            case SVInfiniteScrollingStateTriggered:
-                [self.activityIndicatorView startAnimating];
-                break;
+        case SVInfiniteScrollingStateTriggered:
+            [self.loadingView startLoading];
+            break;
                 
-            case SVInfiniteScrollingStateLoading:
-                [self.activityIndicatorView startAnimating];
-                break;
-        }
+        case SVInfiniteScrollingStateLoading:
+            [self.loadingView startLoading];
+            break;
     }
     
     if(previousState == SVInfiniteScrollingStateTriggered && newState == SVInfiniteScrollingStateLoading && self.infiniteScrollingHandler && self.enabled)

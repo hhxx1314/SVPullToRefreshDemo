@@ -21,7 +21,13 @@
 		22E0D94B1545F63300BB6BB5 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 22E0D94A1545F63300BB6BB5 /* README.md */; };
 		22FDEC971639082E00DB53A8 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 22FDEC961639082E00DB53A8 /* Default-568h@2x.png */; };
 		22FDEC9D16390CC800DB53A8 /* UIScrollView+SVInfiniteScrolling.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288146016047C06005C6461 /* UIScrollView+SVInfiniteScrolling.m */; };
-		35D1ED921A1C24CE00EF0B4E /* wheel@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 35D1ED911A1C24CE00EF0B4E /* wheel@2x.png */; };
+		ABA336341C2BF69800859275 /* SVInfiniteNoMoreDataView.m in Sources */ = {isa = PBXBuildFile; fileRef = ABA3362F1C2BF69800859275 /* SVInfiniteNoMoreDataView.m */; };
+		ABA336351C2BF69800859275 /* SVInfiniteScrollingLoadingView.m in Sources */ = {isa = PBXBuildFile; fileRef = ABA336311C2BF69800859275 /* SVInfiniteScrollingLoadingView.m */; };
+		ABA336361C2BF69800859275 /* SVPullToRefreshLoadingView.m in Sources */ = {isa = PBXBuildFile; fileRef = ABA336331C2BF69800859275 /* SVPullToRefreshLoadingView.m */; };
+		ABA3363B1C2BF90700859275 /* circle@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ABA336371C2BF90700859275 /* circle@2x.png */; };
+		ABA3363C1C2BF90700859275 /* circle@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = ABA336381C2BF90700859275 /* circle@3x.png */; };
+		ABA3363D1C2BF90700859275 /* loading@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = ABA336391C2BF90700859275 /* loading@2x.png */; };
+		ABA3363E1C2BF90700859275 /* loading@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = ABA3363A1C2BF90700859275 /* loading@3x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,7 +53,16 @@
 		22E0D9401545EE9000BB6BB5 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		22E0D94A1545F63300BB6BB5 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		22FDEC961639082E00DB53A8 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "../Default-568h@2x.png"; sourceTree = "<group>"; };
-		35D1ED911A1C24CE00EF0B4E /* wheel@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "wheel@2x.png"; sourceTree = "<group>"; };
+		ABA3362E1C2BF69800859275 /* SVInfiniteNoMoreDataView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SVInfiniteNoMoreDataView.h; sourceTree = "<group>"; };
+		ABA3362F1C2BF69800859275 /* SVInfiniteNoMoreDataView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SVInfiniteNoMoreDataView.m; sourceTree = "<group>"; };
+		ABA336301C2BF69800859275 /* SVInfiniteScrollingLoadingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SVInfiniteScrollingLoadingView.h; sourceTree = "<group>"; };
+		ABA336311C2BF69800859275 /* SVInfiniteScrollingLoadingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SVInfiniteScrollingLoadingView.m; sourceTree = "<group>"; };
+		ABA336321C2BF69800859275 /* SVPullToRefreshLoadingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SVPullToRefreshLoadingView.h; sourceTree = "<group>"; };
+		ABA336331C2BF69800859275 /* SVPullToRefreshLoadingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SVPullToRefreshLoadingView.m; sourceTree = "<group>"; };
+		ABA336371C2BF90700859275 /* circle@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "circle@2x.png"; sourceTree = "<group>"; };
+		ABA336381C2BF90700859275 /* circle@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "circle@3x.png"; sourceTree = "<group>"; };
+		ABA336391C2BF90700859275 /* loading@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "loading@2x.png"; sourceTree = "<group>"; };
+		ABA3363A1C2BF90700859275 /* loading@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "loading@3x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,7 +128,10 @@
 		22E0D91F1545EE5B00BB6BB5 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				35D1ED911A1C24CE00EF0B4E /* wheel@2x.png */,
+				ABA336371C2BF90700859275 /* circle@2x.png */,
+				ABA336381C2BF90700859275 /* circle@3x.png */,
+				ABA336391C2BF90700859275 /* loading@2x.png */,
+				ABA3363A1C2BF90700859275 /* loading@3x.png */,
 				22FDEC961639082E00DB53A8 /* Default-568h@2x.png */,
 				22E0D9201545EE5B00BB6BB5 /* SVPullToRefreshDemo-Info.plist */,
 				22E0D9211545EE5B00BB6BB5 /* InfoPlist.strings */,
@@ -126,6 +144,12 @@
 		22E0D9391545EE7600BB6BB5 /* SVPullToRefresh */ = {
 			isa = PBXGroup;
 			children = (
+				ABA3362E1C2BF69800859275 /* SVInfiniteNoMoreDataView.h */,
+				ABA3362F1C2BF69800859275 /* SVInfiniteNoMoreDataView.m */,
+				ABA336301C2BF69800859275 /* SVInfiniteScrollingLoadingView.h */,
+				ABA336311C2BF69800859275 /* SVInfiniteScrollingLoadingView.m */,
+				ABA336321C2BF69800859275 /* SVPullToRefreshLoadingView.h */,
+				ABA336331C2BF69800859275 /* SVPullToRefreshLoadingView.m */,
 				226989041639F55E00FCBB3B /* SVPullToRefresh.h */,
 				22E0D93A1545EE7600BB6BB5 /* UIScrollView+SVPullToRefresh.h */,
 				22E0D93B1545EE7600BB6BB5 /* UIScrollView+SVPullToRefresh.m */,
@@ -189,10 +213,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				22E0D9231545EE5B00BB6BB5 /* InfoPlist.strings in Resources */,
+				ABA3363E1C2BF90700859275 /* loading@3x.png in Resources */,
+				ABA3363D1C2BF90700859275 /* loading@2x.png in Resources */,
 				22E0D92F1545EE5B00BB6BB5 /* SVViewController.xib in Resources */,
-				35D1ED921A1C24CE00EF0B4E /* wheel@2x.png in Resources */,
 				22E0D94B1545F63300BB6BB5 /* README.md in Resources */,
 				22FDEC971639082E00DB53A8 /* Default-568h@2x.png in Resources */,
+				ABA3363C1C2BF90700859275 /* circle@3x.png in Resources */,
+				ABA3363B1C2BF90700859275 /* circle@2x.png in Resources */,
 				2214365616B48FD70057C96E /* SVPullToRefresh.podspec in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -204,11 +231,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ABA336361C2BF69800859275 /* SVPullToRefreshLoadingView.m in Sources */,
 				22E0D9251545EE5B00BB6BB5 /* main.m in Sources */,
 				22E0D9291545EE5B00BB6BB5 /* SVAppDelegate.m in Sources */,
 				22E0D92C1545EE5B00BB6BB5 /* SVViewController.m in Sources */,
 				22E0D93D1545EE7600BB6BB5 /* UIScrollView+SVPullToRefresh.m in Sources */,
 				22FDEC9D16390CC800DB53A8 /* UIScrollView+SVInfiniteScrolling.m in Sources */,
+				ABA336341C2BF69800859275 /* SVInfiniteNoMoreDataView.m in Sources */,
+				ABA336351C2BF69800859275 /* SVInfiniteScrollingLoadingView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,6 +277,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_BITCODE = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -262,7 +293,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				ONLY_ACTIVE_ARCH = YES;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;
@@ -282,6 +313,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
+				ENABLE_BITCODE = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -290,7 +322,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SDKROOT = iphoneos;

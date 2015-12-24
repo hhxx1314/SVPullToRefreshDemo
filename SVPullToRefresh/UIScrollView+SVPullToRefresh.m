@@ -9,21 +9,13 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import "UIScrollView+SVPullToRefresh.h"
+#import "SVPullToRefreshLoadingView.h"
 
 //fequal() and fequalzro() from http://stackoverflow.com/a/1614761/184130
 #define fequal(a,b) (fabs((a) - (b)) < FLT_EPSILON)
 #define fequalzero(a) (fabs(a) < FLT_EPSILON)
 
 static CGFloat const SVPullToRefreshViewHeight = 60;
-static CGFloat const SVPullToRefreshViewImageHeight = 40;
-static CGFloat const SVPullToRefreshViewImageCount = 4;
-static CGFloat const SVPullToRefreshViewImageScale = 0.8;
-
-@interface SVPullToRefreshArrow : UIView
-
-@property (nonatomic, strong) UIColor *arrowColor;
-
-@end
 
 
 @interface SVPullToRefreshView ()
@@ -51,14 +43,16 @@ static char UIScrollViewPullToRefreshView;
 
 @implementation UIScrollView (SVPullToRefresh)
 
-@dynamic pullToRefreshView, showsPullToRefresh;
+@dynamic pullToRefreshView;
+@dynamic showsPullToRefresh;
 
 - (void)addPullToRefreshWithActionHandler:(void (^)(void))actionHandler{
     
     if(!self.pullToRefreshView) {
         CGFloat yOrigin = -SVPullToRefreshViewHeight;
         
-        SVPullToRefreshView *view = [[SVPullToRefreshView alloc] initWithFrame:CGRectMake(0, yOrigin, self.bounds.size.width, SVPullToRefreshViewHeight)];
+        CGFloat width = [UIScreen mainScreen].bounds.size.width;
+        SVPullToRefreshView *view = [[SVPullToRefreshView alloc] initWithFrame:CGRectMake(0, yOrigin, width, SVPullToRefreshViewHeight)];
         view.pullToRefreshActionHandler = actionHandler;
         view.scrollView = self;
         [self addSubview:view];
@@ -68,7 +62,6 @@ static char UIScrollViewPullToRefreshView;
         self.pullToRefreshView = view;
         self.showsPullToRefresh = YES;
     }
-    
 }
 
 - (void)triggerPullToRefresh {
@@ -89,18 +82,10 @@ static char UIScrollViewPullToRefreshView;
 }
 
 - (void)setShowsPullToRefresh:(BOOL)showsPullToRefresh {
+    
     self.pullToRefreshView.hidden = !showsPullToRefresh;
     
-    if(!showsPullToRefresh) {
-        if (self.pullToRefreshView.isObserving) {
-            [self removeObserver:self.pullToRefreshView forKeyPath:@"contentOffset"];
-            [self removeObserver:self.pullToRefreshView forKeyPath:@"contentSize"];
-            [self removeObserver:self.pullToRefreshView forKeyPath:@"frame"];
-            [self.pullToRefreshView resetScrollViewContentInset];
-            self.pullToRefreshView.isObserving = NO;
-        }
-    }
-    else {
+    if(showsPullToRefresh) {
         if (!self.pullToRefreshView.isObserving) {
             [self addObserver:self.pullToRefreshView forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionNew context:nil];
             [self addObserver:self.pullToRefreshView forKeyPath:@"contentSize" options:NSKeyValueObservingOptionNew context:nil];
@@ -108,8 +93,16 @@ static char UIScrollViewPullToRefreshView;
             self.pullToRefreshView.isObserving = YES;
             
             CGFloat yOrigin = -SVPullToRefreshViewHeight;
-            
             self.pullToRefreshView.frame = CGRectMake(0, yOrigin, self.bounds.size.width, SVPullToRefreshViewHeight);
+        }
+    }
+    else {
+        if (self.pullToRefreshView.isObserving) {
+            [self removeObserver:self.pullToRefreshView forKeyPath:@"contentOffset"];
+            [self removeObserver:self.pullToRefreshView forKeyPath:@"contentSize"];
+            [self removeObserver:self.pullToRefreshView forKeyPath:@"frame"];
+            [self.pullToRefreshView resetScrollViewContentInset];
+            self.pullToRefreshView.isObserving = NO;
         }
     }
 }
@@ -121,14 +114,8 @@ static char UIScrollViewPullToRefreshView;
 @end
 
 #pragma mark - SVPullToRefresh
+
 @implementation SVPullToRefreshView
-
-@synthesize pullToRefreshActionHandler;
-
-@synthesize state = _state;
-@synthesize scrollView = _scrollView;
-@synthesize showsPullToRefresh = _showsPullToRefresh;
-
 
 - (id)initWithFrame:(CGRect)frame {
     if(self = [super initWithFrame:frame]) {
@@ -137,127 +124,11 @@ static char UIScrollViewPullToRefreshView;
         self.state = SVPullToRefreshStateStopped;
         self.wasTriggeredByUser = YES;
         
-        [self initLoadingViews];
+        self.loadingView = [[SVPullToRefreshLoadingView alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
+        [self addSubview:self.loadingView];
     }
     
     return self;
-}
-
-- (void)initLoadingViews
-{
-    UIImage* image = [UIImage imageNamed:@"wheel.png"];
-    self.imageView = [[UIImageView alloc] initWithImage:image];
-    [self addSubview:self.imageView];
-    [self updateImageViewWithPercent:0];
-    
-    NSMutableArray* leftArray = [NSMutableArray array];
-    NSMutableArray* rightArray = [NSMutableArray array];
-    
-    CGFloat scale = SVPullToRefreshViewImageScale;
-    for (int i = 0; i < SVPullToRefreshViewImageCount; i++) {
-        UIImageView* imageView = [[UIImageView alloc] initWithImage:image];
-        imageView.frame = CGRectMake(0, 0, SVPullToRefreshViewImageHeight*scale, SVPullToRefreshViewImageHeight*scale);
-        imageView.center = CGPointMake(self.frame.size.width/2, self.frame.size.height/2);
-        [self addSubview:imageView];
-        [leftArray addObject:imageView];
-        imageView.hidden = YES;
-        
-        scale *= SVPullToRefreshViewImageScale;
-    }
-    self.leftImageViews = leftArray;
-    
-    scale = SVPullToRefreshViewImageScale;
-    for (int i = 0; i < SVPullToRefreshViewImageCount; i++) {
-        UIImageView* imageView = [[UIImageView alloc] initWithImage:image];
-        imageView.frame = CGRectMake(0, 0, SVPullToRefreshViewImageHeight*scale, SVPullToRefreshViewImageHeight*scale);
-        imageView.center = CGPointMake(self.frame.size.width/2, self.frame.size.height/2);
-        [self addSubview:imageView];
-        [rightArray addObject:imageView];
-        imageView.hidden = YES;
-        
-        scale *= SVPullToRefreshViewImageScale;
-    }
-    self.rightImageViews = rightArray;
-}
-
-- (void) startRotateAnimation
-{
-    [CATransaction begin];
-    [CATransaction setValue:(id)kCFBooleanFalse forKey:kCATransactionDisableActions];
-    [CATransaction setValue:[NSNumber numberWithFloat:0.5] forKey:kCATransactionAnimationDuration];
-
-    CABasicAnimation* rotateAnimation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
-    rotateAnimation.toValue = [NSNumber numberWithFloat: M_PI * 2.0 ];
-    rotateAnimation.repeatCount = HUGE_VAL;
-    [self.imageView.layer addAnimation:rotateAnimation forKey:@"rotationAnimation"];
-    
-    CGFloat scale = 1;
-    CGFloat xOffset = self.frame.size.width/2;
-    for (int i = 0; i < SVPullToRefreshViewImageCount; i++) {
-        UIImageView* imageView = [self.leftImageViews objectAtIndex:i];
-        imageView.hidden = NO;
-        xOffset -= (SVPullToRefreshViewImageHeight/2*(scale+scale*SVPullToRefreshViewImageScale)+10);
-        scale *= SVPullToRefreshViewImageScale;
-        
-        CAAnimationGroup* groupAnimation = [self groupAnimationWithOffset:xOffset];
-        [imageView.layer addAnimation:groupAnimation forKey:@"groupAnimation"];
-    }
-    
-    scale = 1;
-    xOffset = self.frame.size.width/2;
-    for (int i = 0; i < SVPullToRefreshViewImageCount; i++) {
-        UIImageView* imageView = [self.rightImageViews objectAtIndex:i];
-        imageView.hidden = NO;
-        xOffset += (SVPullToRefreshViewImageHeight/2*(scale+scale*SVPullToRefreshViewImageScale)+10);
-        scale *= SVPullToRefreshViewImageScale;
-        
-        CAAnimationGroup* groupAnimation = [self groupAnimationWithOffset:xOffset];
-        [imageView.layer addAnimation:groupAnimation forKey:@"groupAnimation"];
-    }
-    
-    
-    [CATransaction commit];
-
-}
-
-- (CAAnimationGroup*)groupAnimationWithOffset:(CGFloat)xOffset
-{
-    CABasicAnimation* moveAnimation = [CABasicAnimation animationWithKeyPath:@"position.x"];
-    moveAnimation.fromValue = @(xOffset);
-    moveAnimation.toValue = @(self.frame.size.width/2);
-    moveAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
-    
-    CABasicAnimation* opacityAnimation = [CABasicAnimation animationWithKeyPath:@"opacity"];
-    opacityAnimation.fromValue = @(1);
-    opacityAnimation.toValue = @(0);
-    
-    opacityAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
-    
-    CAAnimationGroup *groupAnimation = [[CAAnimationGroup alloc] init];
-    CABasicAnimation* rotateAnimation = [CABasicAnimation animationWithKeyPath:@"transform.rotation.z"];
-    rotateAnimation.toValue = [NSNumber numberWithFloat: M_PI * 2.0 ];
-    groupAnimation.animations = @[moveAnimation,opacityAnimation,rotateAnimation];
-    groupAnimation.repeatCount = HUGE_VAL;
-    groupAnimation.autoreverses = YES;
-    
-    return groupAnimation;
-}
-
-- (void) stopRotateAnimation
-{
-    [self.imageView.layer removeAnimationForKey:@"rotationAnimation"];
-    
-    for (UIImageView* imageView in self.leftImageViews) {
-        imageView.hidden = YES;
-        imageView.center = CGPointMake(self.frame.size.width/2, self.frame.size.height/2);
-        [imageView.layer removeAnimationForKey:@"groupAnimation"];
-    }
-    
-    for (UIImageView* imageView in self.rightImageViews) {
-        imageView.hidden = YES;
-        imageView.center = CGPointMake(self.frame.size.width/2, self.frame.size.height/2);
-        [imageView.layer removeAnimationForKey:@"groupAnimation"];
-    }
 }
 
 - (void)willMoveToSuperview:(UIView *)newSuperview {
@@ -334,21 +205,20 @@ static char UIScrollViewPullToRefreshView;
             {
                 self.state = SVPullToRefreshStateStopped;
                 CGFloat percent = contentOffset.y/scrollOffsetThreshold;
-                [self updateImageViewWithPercent:percent];
+                [self.loadingView updateTriggerWithPercent:percent state:_state];
             }
-            
         }
         else if(self.state == SVPullToRefreshStateStopped)
         {
             if (contentOffset.y < scrollOffsetThreshold && self.scrollView.isDragging)
             {
                 self.state = SVPullToRefreshStateTriggered;
-                [self updateImageViewWithPercent:1];
+                [self.loadingView updateTriggerWithPercent:1 state:_state];
             }
             else if(contentOffset.y >= scrollOffsetThreshold && contentOffset.y < 0)
             {
                 CGFloat percent = contentOffset.y/scrollOffsetThreshold;
-                [self updateImageViewWithPercent:percent];
+                [self.loadingView updateTriggerWithPercent:percent state:_state];
             }
             
         }
@@ -403,8 +273,8 @@ static char UIScrollViewPullToRefreshView;
     switch (newState) {
         case SVPullToRefreshStateAll:
         case SVPullToRefreshStateStopped:
-            
-            [self stopRotateAnimation];
+        
+            [self.loadingView stopLoading];
             [self resetScrollViewContentInset];
             
             break;
@@ -414,39 +284,15 @@ static char UIScrollViewPullToRefreshView;
             
         case SVPullToRefreshStateLoading:
             
-            [self updateImageViewWithPercent:1];
-            [self startRotateAnimation];
+            [self.loadingView startLoading];
             [self setScrollViewContentInsetForLoading];
             
-            if(previousState == SVPullToRefreshStateTriggered && pullToRefreshActionHandler)
-                pullToRefreshActionHandler();
+            if(previousState == SVPullToRefreshStateTriggered && _pullToRefreshActionHandler)
+                _pullToRefreshActionHandler();
             
             break;
     }
 }
-
-- (void)updateImageViewWithPercent:(CGFloat)percent
-{
-    self.imageView.frame = CGRectMake(0, 0, SVPullToRefreshViewImageHeight*percent, SVPullToRefreshViewImageHeight*percent);
-    self.imageView.center = CGPointMake(self.frame.size.width/2, self.frame.size.height/2);
-    
-    CAShapeLayer* maskLayer = [CAShapeLayer layer];
-    UIBezierPath* path = [UIBezierPath bezierPath];
-    CGPoint centerPoint = CGPointMake(SVPullToRefreshViewImageHeight/2*percent, SVPullToRefreshViewImageHeight/2*percent);
-    [path moveToPoint:centerPoint];
-    [path addArcWithCenter:centerPoint radius:SVPullToRefreshViewImageHeight/2*percent startAngle:-M_PI_2 endAngle:-M_PI_2+M_PI*2*percent clockwise:YES];
-    [path closePath];
-    maskLayer.path = path.CGPath;
-    
-    maskLayer.fillColor = [UIColor blackColor].CGColor;
-    maskLayer.strokeColor = [UIColor redColor].CGColor;
-    maskLayer.frame = self.imageView.bounds;
-    maskLayer.contentsScale = [UIScreen mainScreen].scale;
-    
-    self.imageView.layer.mask = maskLayer;
-}
-
-
 
 @end
 

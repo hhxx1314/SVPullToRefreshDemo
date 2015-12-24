@@ -10,6 +10,8 @@
 #import <UIKit/UIKit.h>
 
 @class SVInfiniteScrollingView;
+@class SVInfiniteScrollingLoadingView;
+@class SVInfiniteNoMoreDataView;
 
 @interface UIScrollView (SVInfiniteScrolling)
 
@@ -19,8 +21,9 @@
 @property (nonatomic, strong, readonly) SVInfiniteScrollingView *infiniteScrollingView;
 @property (nonatomic, assign) BOOL showsInfiniteScrolling;
 
-@end
+@property (nonatomic, assign) BOOL showsNoMoreDataView;
 
+@end
 
 enum {
 	SVInfiniteScrollingStateStopped = 0,
@@ -33,11 +36,12 @@ typedef NSUInteger SVInfiniteScrollingState;
 
 @interface SVInfiniteScrollingView : UIView
 
-@property (nonatomic, readwrite) UIActivityIndicatorViewStyle activityIndicatorViewStyle;
 @property (nonatomic, readonly) SVInfiniteScrollingState state;
 @property (nonatomic, readwrite) BOOL enabled;
+@property (nonatomic, assign) BOOL hasMoreData;
 
-- (void)setCustomView:(UIView *)view forState:(SVInfiniteScrollingState)state;
+@property (nonatomic, strong) SVInfiniteScrollingLoadingView *loadingView;
+@property (nonatomic, strong) UIView *noMoreDataView;
 
 - (void)startAnimating;
 - (void)stopAnimating;
